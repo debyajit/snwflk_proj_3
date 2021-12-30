@@ -35,10 +35,9 @@ models:
   snwflk_proj_3:
     # Applies to all files under models/example/
     STAGING:
+     schema: DBT_DEBYAJIT
      SRC1:
       stg_SRC1_customers:
        materialized: table
       stg_SRC1_orders:
        materialized: table
-       
-      
