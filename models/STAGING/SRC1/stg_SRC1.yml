@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: SRC1 #--this source logical name , in absence of schema specifier will consider this as schema
+    description: A replica of the postgres database
+    database: ANALYTICS # this is source db, as long role has access to this db , dont need special mention in profile
+    schema: DBT_DEBYAJIT
+    tables:
+      - name: customers_src
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+      - name: orders_src
+        description: One record per order
+        loaded_at_field: _etl_loaded_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          #error_after: {count: 24, period: hour}
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+         
