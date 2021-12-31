@@ -35,9 +35,15 @@ models:
   snwflk_proj_3:
     # Applies to all files under models/example/
     STAGING:
-     schema: DBT_DEBYAJIT
+     #schema: dbt_debyajit - taking out as target schema taken from profile
      SRC1:
       stg_SRC1_customers:
        materialized: table
+       
       stg_SRC1_orders:
        materialized: table
+    MARTS:
+     schema: dbt_mrt_deb
+     MART_CUST_ORDERS:
+      materialized: table
+      
