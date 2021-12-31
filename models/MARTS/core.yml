@@ -1,0 +1,9 @@
+## details of all mart tables
+
+
+version: 2
+
+models:
+  - name: MART_CUST_ORDERS
+    
+    
