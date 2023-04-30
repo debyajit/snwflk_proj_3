@@ -1,36 +1,36 @@
-
 import xml.etree.ElementTree as ET
 
-# Parse XML file
-tree = ET.parse('input.xml')
+# Parse input XML file
+tree = ET.parse('input_ctm.xml')
 root = tree.getroot()
 
-# Open reference file
+# Open reference file and store values in a dictionary
+reference = {}
 with open('reference.txt') as f:
-    ref = f.readlines()
+    for line in f:
+        fields = line.strip().split('~')
+        reference[fields[1]] = (fields[2], fields[3])
 
-# Create output file
-with open('output.txt', 'w') as f:
-    # Write header
-    f.write('PARENT_FOLDER,JOBNAME,VARIABLE name,VARIABLE value,REFERENCE FIELD 3,REFERENCE FIELD 4\n')
+# Print header
+print('PARENT_FOLDER,JOBNAME,VARIABLE name,VARIABLE value,REFERENCE FIELD 3,REFERENCE FIELD 4')
 
-    # Loop through jobs
-    for job in root.iter('JOB'):
-        # Get job details
-        parent_folder = job.attrib['PARENT_FOLDER']
-        jobname = job.attrib['JOBNAME']
-
-        # Loop through variables
-        for var in job.iter('VARIABLE'):
-            var_name = var.attrib['NAME']
-            var_value = var.attrib['VALUE']
-
-            # Find matching reference field
-            for line in ref:
-                if var_name in line:
-                    ref_fields = line.strip().split('~')
-                    ref_field_3 = ref_fields[2]
-                    ref_field_4 = ref_fields[3]
-
-                    # Write output row
-                    f.write(f'{parent_folder},{jobname},{var_name},{var_value},{ref_field_3},{ref_field_4}\n')
+# Process each JOB element
+for job in root.iter('JOB'):
+    # Get PARENT_FOLDER and JOBNAME attributes
+    parent_folder = job.attrib['PARENT_FOLDER']
+    jobname = job.attrib['JOBNAME']
+    
+    # Process each VARIABLE element
+    for var in job.iter('VARIABLE'):
+        # Get VARIABLE name and value attributes
+        var_name = var.attrib['NAME']
+        var_value = var.attrib['VALUE']
+        
+        # Look up var_value in reference dictionary
+        if var_value in reference:
+            ref_fields = reference[var_value]
+        else:
+            ref_fields = ('nomatch', '')
+        
+        # Print output
+        print(f'{parent_folder},{jobname},{var_name},{var_value},{ref_fields[0]},{ref_fields[1]}')
