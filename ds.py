@@ -9,7 +9,10 @@ reference = {}
 with open('reference.txt') as f:
     for line in f:
         fields = line.strip().split('~')
-        reference[fields[1]] = (fields[2], fields[3])
+        if len(fields) >= 4:
+            reference[fields[1]] = (fields[2], fields[3])
+        else:
+            reference[fields[1]] = ('', '')
 
 # Print header
 print('PARENT_FOLDER,JOBNAME,VARIABLE name,VARIABLE value,REFERENCE FIELD 3,REFERENCE FIELD 4')
