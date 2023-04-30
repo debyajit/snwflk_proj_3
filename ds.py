@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
 # Parse input XML file
-tree = ET.parse('input_ctm.xml')
+tree = ET.parse('input.xml')
 root = tree.getroot()
 
 # Open reference file and store values in a dictionary
@@ -9,10 +9,10 @@ reference = {}
 with open('reference.txt') as f:
     for line in f:
         fields = line.strip().split('~')
-        if len(fields) >= 4:
-            reference[fields[1]] = (fields[2], fields[3])
+        if len(fields) >= 2:
+            reference[fields[1]] = (fields[2] if len(fields) >= 3 else '', fields[3] if len(fields) >= 4 else '')
         else:
-            reference[fields[1]] = ('', '')
+            continue
 
 # Print header
 print('PARENT_FOLDER,JOBNAME,VARIABLE name,VARIABLE value,REFERENCE FIELD 3,REFERENCE FIELD 4')
