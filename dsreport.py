@@ -1,77 +1,65 @@
 import xml.etree.ElementTree as ET
 import yaml
 
-# read the input XML file
+# Load XML file
 tree = ET.parse('input.xml')
 root = tree.getroot()
 
-# extract job details
-job = {}
-job['Name'] = root.attrib['Name']
-job['Desc'] = root.attrib['Desc']
-job['Status'] = root.attrib['Status']
-job['WaveNo'] = root.attrib['WaveNo']
-job['StartDateTime'] = root.attrib['StartDateTime']
-job['EndDateTime'] = root.attrib['EndDateTime']
-job['ElapsedTime'] = root.attrib['ElapsedTime']
-job['ElapsedSecs'] = root.attrib['ElapsedSecs']
+# Initialize YAML data
+yaml_data = {}
 
-# extract parameter details
-params = []
-for param in root.iter('Param'):
-    param_dict = {}
-    param_dict['Name'] = param.attrib['Name']
-    param_dict['Type'] = param.attrib['Type']
-    param_dict['Desc'] = param.attrib['Desc']
-    param_dict['Value'] = param.attrib['Value']
-    params.append(param_dict)
+# Parse job information
+job_info = {}
+job_info['Name'] = root.attrib['Name']
+job_info['Desc'] = root.attrib['Desc']
+job_info['Status'] = root.attrib['Status']
+job_info['WaveNo'] = root.attrib['WaveNo']
+job_info['StartDateTime'] = root.attrib['StartDateTime']
+job_info['EndDateTime'] = root.attrib['EndDateTime']
+job_info['ElapsedTime'] = root.attrib['ElapsedTime']
+job_info['ElapsedSecs'] = root.attrib['ElapsedSecs']
+yaml_data['Job'] = job_info
 
-# extract stage details
-stages = []
-for stage in root.iter('Stage'):
-    stage_dict = {}
-    stage_dict['Name'] = stage.attrib['Name']
-    stage_dict['Desc'] = stage.attrib['Desc']
-    stage_dict['StageStatus'] = stage.attrib['StageStatus']
-    stage_dict['StageType'] = stage.attrib['StageType']
-    stage_dict['StartDateTime'] = stage.attrib['StartDateTime']
-    stage_dict['EndDateTime'] = stage.attrib['EndDateTime']
-    stage_dict['ElapsedTime'] = stage.attrib['ElapsedTime']
-    stage_dict['ElapsedSecs'] = stage.attrib['ElapsedSecs']
+# Parse stage information
+stage_list = []
+for component in root.findall('ComponentSet/Stage'):
+    stage_info = {}
+    stage_info['Name'] = component.attrib['Name']
+    stage_info['StageStatus'] = component.attrib['StageStatus']
+    stage_info['StageType'] = component.attrib['StageType']
+    stage_info['Desc'] = component.attrib['Desc']
+    stage_info['StartDateTime'] = component.attrib['StartDateTime']
+    stage_info['EndDateTime'] = component.attrib['EndDateTime']
+    stage_info['ElapsedTime'] = component.attrib['ElapsedTime']
+    stage_info['ElapsedSecs'] = component.attrib['ElapsedSecs']
 
-    # extract input link details
-    input_links = []
-    for input_link in stage.iter('Link'):
-        if input_link.attrib['LinkType'] == '1':
-            input_link_dict = {}
-            input_link_dict['Name'] = input_link.attrib['Name']
-            input_link_dict['LinkType'] = input_link.attrib['LinkType']
-            input_link_dict['Desc'] = input_link.attrib['Desc']
-            input_link_dict['Stage'] = input_link.attrib['Stage']
-            input_links.append(input_link_dict)
+    # Parse input link information
+    input_link_list = []
+    for input_link in component.findall('InputLinks/Link'):
+        if input_link.get('LinkType') == '1':
+            input_link_info = {}
+            input_link_info['Name'] = input_link.attrib['Name']
+            input_link_info['Desc'] = input_link.attrib['Desc']
+            input_link_info['Stage'] = input_link.attrib['Stage']
+            input_link_list.append(input_link_info)
+    stage_info['InputLinks'] = input_link_list
 
-    # extract output link details
-    output_links = []
-    for output_link in stage.iter('Link'):
-        if output_link.attrib['LinkType'] == '3':
-            output_link_dict = {}
-            output_link_dict['Name'] = output_link.attrib['Name']
-            output_link_dict['LinkType'] = output_link.attrib['LinkType']
-            output_link_dict['Desc'] = output_link.attrib['Desc']
-            output_link_dict['Stage'] = output_link.attrib['Stage']
-            output_links.append(output_link_dict)
+    # Parse output link information
+    output_link_list = []
+    for output_link in component.findall('OutputLinks/Link'):
+        output_link_info = {}
+        output_link_info['Name'] = output_link.attrib['Name']
+        output_link_info['Desc'] = output_link.attrib['Desc']
+        output_link_info['Stage'] = output_link.attrib['Stage']
+        output_link_list.append(output_link_info)
+    stage_info['OutputLinks'] = output_link_list
 
-    stage_dict['InputLinks'] = input_links
-    stage_dict['OutputLinks'] = output_links
+    # Append stage information to list
+    stage_list.append(stage_info)
 
-    stages.append(stage_dict)
+# Add stage information to YAML data
+yaml_data['Stage'] = stage_list
 
-# construct the YAML output
-output = {}
-output['Job'] = job
-output['Params'] = params
-output['Stages'] = stages
-
-# write the output YAML file
-with open('output.yml', 'w') as file:
-    yaml.dump(output, file, default_flow_style=False)
+# Output YAML data to file
+with open('output.yml', 'w') as f:
+    yaml.dump(yaml_data, f, default_flow_style=False)
