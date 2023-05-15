@@ -1,61 +1,75 @@
 import xml.etree.ElementTree as ET
+import yaml
 
-def main():
-    # Get the input XML file name
-    xml_file_name = input("Enter the input XML file name: ")
+# Parse XML file
+tree = ET.parse('input.xml')
+root = tree.getroot()
 
-    # Read the XML file
-    tree = ET.parse(xml_file_name)
+# Create dictionary to store job details
+job_details = {}
+job_details['Job'] = {}
+job_details['Job']['Name'] = root.attrib['Name']
+job_details['Job']['Desc'] = root.attrib['Desc']
+job_details['Job']['Status'] = root.attrib['Status']
+job_details['Job']['WaveNo'] = root.attrib['WaveNo']
+job_details['Job']['StartDateTime'] = root.attrib['StartDateTime']
+job_details['Job']['EndDateTime'] = root.attrib['EndDateTime']
+job_details['Job']['ElapsedTime'] = root.attrib['ElapsedTime']
+job_details['Job']['ElapsedSecs'] = root.attrib['ElapsedSecs']
 
-    # Get the root of the XML tree
-    root = tree.getroot()
+# Create list to store parameter details
+param_list = []
+for param in root.findall("./ParamSet/Param"):
+    param_dict = {}
+    param_dict['Name'] = param.attrib['Name']
+    param_dict['Type'] = param.attrib['Type']
+    param_dict['Desc'] = param.attrib['Desc']
+    param_dict['Value'] = param.attrib['Value']
+    param_list.append(param_dict)
 
-    # Create a YAML file
-    with open("output.yml", "w") as yml_file:
+job_details['ParamSet'] = param_list
 
-        # Write the job details to the YAML file
-        yml_file.write("job:\n")
-        yml_file.write("  name: " + root.attrib["Name"] + "\n")
-        yml_file.write("  desc: " + root.attrib["Desc"] + "\n")
-        yml_file.write("  status: " + root.attrib["Status"] + "\n")
-        yml_file.write("  waveNo: " + root.attrib["WaveNo"] + "\n")
-        yml_file.write("  startDateTime: " + root.attrib["StartDateTime"] + "\n")
-        yml_file.write("  endDateTime: " + root.attrib["EndDateTime"] + "\n")
-        yml_file.write("  elapsedTime: " + root.attrib["ElapsedTime"] + "\n")
-        yml_file.write("  elapsedSecs: " + root.attrib["ElapsedSecs"] + "\n")
+# Create list to store stage details
+stage_list = []
+for stage in root.findall("./ComponentSet/Stage"):
+    stage_dict = {}
+    stage_dict['Name'] = stage.attrib['Name']
+    stage_dict['StageStatus'] = stage.attrib['StageStatus']
+    stage_dict['StageType'] = stage.attrib['StageType']
+    stage_dict['Desc'] = stage.attrib['Desc']
+    stage_dict['StartDateTime'] = stage.attrib['StartDateTime']
+    stage_dict['EndDateTime'] = stage.attrib['EndDateTime']
+    stage_dict['ElapsedTime'] = stage.attrib['ElapsedTime']
+    stage_dict['ElapsedSecs'] = stage.attrib['ElapsedSecs']
+    
+    # Create list to store input link details
+    input_links = []
+    for link in stage.findall("./InputLinks/Link"):
+        link_dict = {}
+        link_dict['Name'] = link.attrib['Name']
+        link_dict['LinkType'] = link.attrib['LinkType']
+        link_dict['Desc'] = link.attrib['Desc']
+        link_dict['Stage'] = link.attrib['Stage']
+        input_links.append(link_dict)
+    
+    stage_dict['InputLinks'] = input_links
+    
+    # Create list to store output link details
+    output_links = []
+    for link in stage.findall("./OutputLinks/Link"):
+        link_dict = {}
+        link_dict['Name'] = link.attrib['Name']
+        link_dict['LinkType'] = link.attrib['LinkType']
+        link_dict['Desc'] = link.attrib['Desc']
+        link_dict['Stage'] = link.attrib['Stage']
+        output_links.append(link_dict)
+    
+    stage_dict['OutputLinks'] = output_links
+    
+    stage_list.append(stage_dict)
 
-        # Write the ParamSet details to the YAML file
-        yml_file.write("paramSet:\n")
-        for param in root.findall("ParamSet/Param"):
-            yml_file.write("  name: " + param.attrib["Name"] + "\n")
-            yml_file.write("  type: " + param.attrib["Type"] + "\n")
-            yml_file.write("  desc: " + param.attrib["Desc"] + "\n")
-            yml_file.write("  value: " + param.attrib["Value"] + "\n")
+job_details['ComponentSet'] = stage_list
 
-        # Write the Stage details to the YAML file
-        yml_file.write("stages:\n")
-        for stage in root.findall("ComponentSet/Stage"):
-            yml_file.write("  name: " + stage.attrib["Name"] + "\n")
-            yml_file.write("  stageStatus: " + stage.attrib["StageStatus"] + "\n")
-            yml_file.write("  stageType: " + stage.attrib["StageType"] + "\n")
-            yml_file.write("  desc: " + stage.attrib["Desc"] + "\n")
-            yml_file.write("  startDateTime: " + stage.attrib["StartDateTime"] + "\n")
-            yml_file.write("  endDateTime: " + stage.attrib["EndDateTime"] + "\n")
-            yml_file.write("  elapsedTime: " + stage.attrib["ElapsedTime"] + "\n")
-            yml_file.write("  elapsedSecs: " + stage.attrib["ElapsedSecs"] + "\n")
-
-            # Write the InputLinks details to the YAML file
-            yml_file.write("  inputLinks:\n")
-            for input_link in stage.findall("InputLinks/Link"):
-                yml_file.write("    name: " + input_link.attrib["Name"] + "\n")
-                yml_file.write("    linkType: " + input_link.attrib["LinkType"] + "\n")
-                yml_file.write("    desc: " + input_link.attrib["Desc"] + "\n")
-                yml_file.write("    stage: " + input_link.attrib["Stage"] + "\n")
-
-            # Write the OutputLinks details to the YAML file
-            yml_file.write("  outputLinks:\n")
-            for output_link in stage.findall("OutputLinks/Link"):
-                yml_file.write("    name: " + output_link.attrib["Name"] + "\n")
-                yml_file.write("    linkType: " + output_link.attrib["LinkType"] + "\n")
-                yml_file.write("    desc: " + output_link.attrib["Desc"] + "\n")
-                yml_file
+# Output YAML file
+with open('output.yml', 'w') as outfile:
+    yaml.dump(job_details, outfile, default_flow_style=False)
