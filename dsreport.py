@@ -33,7 +33,7 @@ for job in xml_tree.findall(".//JOB"):
                     "PARENT_FOLDER": parent_folder,
                     "JOBNAME": job_name,
                     "VARIABLE_NAME": variable_name,
-                    "VARIABLE_VALUE": row[1],
+                    "VARIABLE_VALUE": row[1] if row else "no match",
                     "REFERENCE_1": row[2],
                     "REFERENCE_2": row[3],
                 }
@@ -45,7 +45,7 @@ for job in xml_tree.findall(".//JOB"):
             "PARENT_FOLDER": parent_folder,
             "JOBNAME": job_name,
             "VARIABLE_NAME": variable_name,
-            "VARIABLE_VALUE": row[1],
+            "VARIABLE_VALUE": "no match",
             "REFERENCE_1": "no match",
             "REFERENCE_2": "no match",
         }
