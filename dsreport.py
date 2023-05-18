@@ -1,8 +1,19 @@
-for job in xml_tree.findall(".//JOB"):
+import xml.etree.ElementTree as ET
+import csv
 
-    # Check if the job is None
-    if job is None:
-        continue
+# Read the input XML file
+xml_file = open("input.xml", "r")
+xml_tree = ET.parse(xml_file)
+
+# Read the reference text file
+reference_file = open("reference.txt", "r")
+reference_reader = csv.reader(reference_file, delimiter="~")
+
+# Create a dictionary to store the output data
+op1 = {}
+
+# Iterate over the XML tree
+for job in xml_tree.findall(".//JOB"):
 
     # Get the parent folder, job name, and variable name
     parent_folder = job.get("PARENT_FOLDER")
@@ -12,14 +23,15 @@ for job in xml_tree.findall(".//JOB"):
     # Get the corresponding data from the reference file
     for row in reference_reader:
         if row[0] == variable_name:
-            op1[job_name] = {
-                "PARENT_FOLDER": parent_folder,
-                "VARIABLE_NAME": variable_name,
-                "VARIABLE_VALUE": row[1],
-                "REFERENCE_1": row[2],
-                "REFERENCE_2": row[3],
-            }
-            break
+            if row:
+                op1[job_name] = {
+                    "PARENT_FOLDER": parent_folder,
+                    "VARIABLE_NAME": variable_name,
+                    "VARIABLE_VALUE": row[1],
+                    "REFERENCE_1": row[2],
+                    "REFERENCE_2": row[3],
+                }
+                break
 
     # Check if the variable was found in the reference file
     if variable_name not in op1:
@@ -51,3 +63,4 @@ for job in op1:
     # Save the dsreport output to a file
     with open("dsreport_output.xml", "wb") as f:
         f.write(dsreport_output)
+
