@@ -1,19 +1,8 @@
-import xml.etree.ElementTree as ET
-import csv
-
-# Read the input XML file
-xml_file = open("input.xml", "r")
-xml_tree = ET.parse(xml_file)
-
-# Read the reference text file
-reference_file = open("reference.txt", "r")
-reference_reader = csv.reader(reference_file, delimiter="~")
-
-# Create a dictionary to store the output data
-op1 = {}
-
-# Iterate over the XML tree
 for job in xml_tree.findall(".//JOB"):
+
+    # Check if the job is None
+    if job is None:
+        continue
 
     # Get the parent folder, job name, and variable name
     parent_folder = job.get("PARENT_FOLDER")
@@ -48,3 +37,17 @@ for job in xml_tree.findall(".//JOB"):
         op1[job_name]["HAS_DOT"] = "A"
     else:
         op1[job_name]["HAS_DOT"] = "B"
+
+# Iterate over the output dictionary
+for job in op1:
+
+    # Go to the /proj/scripts directory
+    os.chdir("/proj/scripts")
+
+    # Execute the dsreport command
+    dsreport_command = "dsreport " + op1[job]["REFERENCE_2"]
+    dsreport_output = subprocess.check_output(dsreport_command, shell=True)
+
+    # Save the dsreport output to a file
+    with open("dsreport_output.xml", "wb") as f:
+        f.write(dsreport_output)
