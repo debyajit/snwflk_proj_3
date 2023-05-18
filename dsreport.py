@@ -51,7 +51,7 @@ for job in xml_tree.findall(".//JOB"):
         }
 
     # Check if the reference file has a . character in the second field
-    if "." in op1[job_name].get("REFERENCE_1", ""):
+    if "." in op1.get(job_name, {}).get("REFERENCE_1", ""):
         op1[job_name]["HAS_DOT"] = "A"
     else:
         op1[job_name]["HAS_DOT"] = "B"
