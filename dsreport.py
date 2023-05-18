@@ -18,14 +18,20 @@ for job in xml_tree.findall(".//JOB"):
     # Get the parent folder, job name, and variable name
     parent_folder = job.get("PARENT_FOLDER")
     job_name = job.get("JOBNAME")
-    variable_name = job.find("VARIABLE").get("NAME")
+
+    # Check if the variable element exists
+    if job.find("VARIABLE") is not None:
+        variable_name = job.find("VARIABLE").get("NAME")
+    else:
+        variable_name = None
 
     # Get the corresponding data from the reference file
     for row in reference_reader:
-        if row[0] == variable_name:
+        if variable_name is not None and row[0] == variable_name:
             if row:
                 op1[job_name] = {
                     "PARENT_FOLDER": parent_folder,
+                    "JOBNAME": job_name,
                     "VARIABLE_NAME": variable_name,
                     "VARIABLE_VALUE": row[1],
                     "REFERENCE_1": row[2],
@@ -34,7 +40,7 @@ for job in xml_tree.findall(".//JOB"):
                 break
 
     # Check if the variable was found in the reference file
-    if variable_name not in op1:
+    if variable_name is not None and variable_name not in op1:
         op1[job_name] = {
             "PARENT_FOLDER": parent_folder,
             "JOBNAME": job_name,
