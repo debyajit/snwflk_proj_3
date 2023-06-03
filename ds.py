@@ -1,9 +1,3 @@
-
-awk -F "~" '{ if (NF < 68) { getline nextLine; $0 = $0 nextLine; } print }' input.csv > output.csv
-
-awk '!/^2023/ { printf "%s", prev; prev = $0; next } { print prev; prev = $0 } END { print prev }' input.txt > output.txt
-
-
 #!/bin/bash
 
 # Input and output file paths
@@ -18,10 +12,12 @@ while IFS= read -r line; do
     echo "$line" >> "$output_file"
   else
     # Concatenate the line with the previous line
-    concatenated_line=$(echo -e "${concatenated_line}${line}")
+    concatenated_line=$(echo -e "${concatenated_line}~${line}")
     # Check if the concatenated line contains 68 delimiters
     delimiter_count=$(awk -F "~" '{print NF-1}' <<< "$concatenated_line")
     if [[ $delimiter_count -eq 68 ]]; then
+      # Replace the first "~" with an empty space
+      concatenated_line=${concatenated_line/#~}
       # Output the concatenated line with the end of line character
       echo "${concatenated_line}$" >> "$output_file"
       # Reset the concatenated line
@@ -29,5 +25,3 @@ while IFS= read -r line; do
     fi
   fi
 done < "$input_file"
-
-
