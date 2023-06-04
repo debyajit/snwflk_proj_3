@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 input_file="$1"
@@ -9,8 +10,8 @@ sed '/^$/d' "$input_file" > "$output_file"
 # Concatenate lines that don't start with "2023" with previous line
 awk -F "~" 'BEGIN {OFS="~"; prev=""} { if ($1 ~ /^2023/) { if (prev != "") print prev; prev=$0; } else { prev = prev $0 } } END { print prev }' "$output_file" > "$output_file.tmp"
 
-# Append any remaining concatenated line to the output file
-cat "$output_file.tmp" >> "$output_file"
+# Replace consecutive tilde (~) characters with a single tilde
+sed -i 's/~~*/~/g' "$output_file.tmp"
 
-# Remove temporary file
-rm "$output_file.tmp"
+# Move the temporary file to the final output file
+mv "$output_file.tmp" "$output_file"
