@@ -26,11 +26,10 @@ sed -i "${blank_line_num}d" "$file"
 
 # Concatenate the lines with line numbers blank_line_num-1 and blank_line_num
 if [ "$blank_line_num" -gt 1 ]; then
-  sed -i "${blank_line_num}s/$/$(sed -n "${blank_line_num-1}p" "$file")/" "$file"
+  awk -v line_num=$((blank_line_num-1)) 'NR==line_num{line=$0} NR==line_num+1{$0=$0 line} NR!=line_num{print}' "$file" > "$output_file"
+else
+  cp "$file" "$output_file"
 fi
-
-# Write the updated file to the output file
-cp "$file" "$output_file"
 
 # Print the success message
 echo "Output written to $output_file"
