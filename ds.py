@@ -1,17 +1,18 @@
-
 #!/bin/bash
 
-input_file="$1"
-output_file="output.csv"
+# Check if file name is provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <file_name>"
+  exit 1
+fi
 
-# Delete blank lines from input file
-sed '/^$/d' "$input_file" > "$output_file"
+# Remove blank lines
+sed '/^$/d' "$1" > temp.csv
 
-# Concatenate lines that don't start with "2023" with previous line
-awk -F "~" 'BEGIN {OFS="~"; prev=""} { if ($1 ~ /^2023/) { if (prev != "") print prev; prev=$0; } else { prev = prev $0 } } END { print prev }' "$output_file" > "$output_file.tmp"
+# Concatenate lines that do not start with "2023"
+awk -F"~" 'NR==1 {print $0} NR>1 {if ($1 ~ /^2023/) {if (line) print line; line=$0} else {line=line"~"$0}} END {print line}' temp.csv > output.csv
 
-# Replace consecutive tilde (~) characters with a single tilde
-sed -i 's/~~*/~/g' "$output_file.tmp"
+# Remove temporary file
+rm temp.csv
 
-# Move the temporary file to the final output file
-mv "$output_file.tmp" "$output_file"
+echo "Output written to output.csv"
